@@ -220,7 +220,7 @@ public class KafkaModule {
                         ImmutableMap.of(
                             "schema.registry.basic.auth.user.info",
                             connection.getSchemaRegistry().getBasicAuthUsername() + ":" +
-                                    connection.getSchemaRegistry().getBasicAuthPassword()
+                                connection.getSchemaRegistry().getBasicAuthPassword()
                         )
                     );
                 restService.setBasicAuthCredentialProvider(basicAuthCredentialProvider);
