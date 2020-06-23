@@ -60,29 +60,29 @@ public class KafkaModule {
 
     public List<String> getClustersList() {
         return this.connections
-                .stream()
-                .map(r -> r.getName().split("\\.")[0])
-                .distinct()
-                .collect(Collectors.toList());
+            .stream()
+            .map(r -> r.getName().split("\\.")[0])
+            .distinct()
+            .collect(Collectors.toList());
     }
 
     private Connection getConnection(String cluster) {
         return this.connections
-                .stream()
-                .filter(r -> r.getName().equals(cluster))
-                .findFirst()
-                .get();
+            .stream()
+            .filter(r -> r.getName().equals(cluster))
+            .findFirst()
+            .get();
     }
 
     private Properties getDefaultsProperties(List<? extends AbstractProperties> current, String type) {
         Properties properties = new Properties();
 
         current
-                .stream()
-                .filter(r -> r.getName().equals(type))
-                .forEach(r -> r.getProperties()
-                        .forEach(properties::put)
-                );
+            .stream()
+            .filter(r -> r.getName().equals(type))
+            .forEach(r -> r.getProperties()
+                    .forEach(properties::put)
+            );
 
         return properties;
     }
@@ -169,9 +169,9 @@ public class KafkaModule {
 
     public KafkaConsumer<byte[], byte[]> getConsumer(String clusterId) {
         return new KafkaConsumer<>(
-                this.getConsumerProperties(clusterId),
-                new ByteArrayDeserializer(),
-                new ByteArrayDeserializer()
+            this.getConsumerProperties(clusterId),
+            new ByteArrayDeserializer(),
+            new ByteArrayDeserializer()
         );
     }
 
@@ -180,9 +180,9 @@ public class KafkaModule {
         props.putAll(properties);
 
         return new KafkaConsumer<>(
-                props,
-                new ByteArrayDeserializer(),
-                new ByteArrayDeserializer()
+            props,
+            new ByteArrayDeserializer(),
+            new ByteArrayDeserializer()
         );
     }
 
@@ -191,9 +191,9 @@ public class KafkaModule {
     public KafkaProducer<byte[], byte[]> getProducer(String clusterId) {
         if (!this.producers.containsKey(clusterId)) {
             this.producers.put(clusterId, new KafkaProducer<>(
-                    this.getProducerProperties(clusterId),
-                    new ByteArraySerializer(),
-                    new ByteArraySerializer()
+                this.getProducerProperties(clusterId),
+                new ByteArraySerializer(),
+                new ByteArraySerializer()
             ));
         }
 
@@ -206,19 +206,19 @@ public class KafkaModule {
 
         if (connection.getSchemaRegistry() != null) {
             RestService restService = new RestService(
-                    connection.getSchemaRegistry().getUrl().toString()
+                connection.getSchemaRegistry().getUrl().toString()
             );
 
             if (connection.getSchemaRegistry().getBasicAuthUsername() != null) {
                 BasicAuthCredentialProvider basicAuthCredentialProvider = BasicAuthCredentialProviderFactory
-                        .getBasicAuthCredentialProvider(
-                                new UserInfoCredentialProvider().alias(),
-                                ImmutableMap.of(
-                                        "schema.registry.basic.auth.user.info",
-                                        connection.getSchemaRegistry().getBasicAuthUsername() + ":" +
-                                                connection.getSchemaRegistry().getBasicAuthPassword()
-                                )
-                        );
+                    .getBasicAuthCredentialProvider(
+                            new UserInfoCredentialProvider().alias(),
+                            ImmutableMap.of(
+                                    "schema.registry.basic.auth.user.info",
+                                    connection.getSchemaRegistry().getBasicAuthUsername() + ":" +
+                                            connection.getSchemaRegistry().getBasicAuthPassword()
+                            )
+                    );
                 restService.setBasicAuthCredentialProvider(basicAuthCredentialProvider);
             }
 
@@ -237,9 +237,9 @@ public class KafkaModule {
             Connection connection = this.getConnection(clusterId);
 
             SchemaRegistryClient client = new CachedSchemaRegistryClient(
-                    this.getRegistryRestClient(clusterId),
-                    Integer.MAX_VALUE,
-                    connection.getSchemaRegistry() != null ? connection.getSchemaRegistry().getProperties() : null
+                this.getRegistryRestClient(clusterId),
+                Integer.MAX_VALUE,
+                connection.getSchemaRegistry() != null ? connection.getSchemaRegistry().getProperties() : null
             );
 
             this.registryClient.put(clusterId, client);
