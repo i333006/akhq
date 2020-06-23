@@ -1,0 +1,14 @@
+---
+applications:
+  - name: akhq-dashboard
+    memory: 1G
+    instances: 1
+    path: build/libs/akhq-0.1-all.jar
+    health-check-type: none
+    buildpack: https://github.com/cloudfoundry/java-buildpack.git#v4.16
+    timeout: 180
+    services:
+      - mykafka
+      - application-log
+    env:
+      JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'
