@@ -81,7 +81,7 @@ public class KafkaModule {
             .stream()
             .filter(r -> r.getName().equals(type))
             .forEach(r -> r.getProperties()
-                    .forEach(properties::put)
+                .forEach(properties::put)
             );
 
         return properties;
@@ -212,12 +212,12 @@ public class KafkaModule {
             if (connection.getSchemaRegistry().getBasicAuthUsername() != null) {
                 BasicAuthCredentialProvider basicAuthCredentialProvider = BasicAuthCredentialProviderFactory
                     .getBasicAuthCredentialProvider(
-                            new UserInfoCredentialProvider().alias(),
-                            ImmutableMap.of(
-                                    "schema.registry.basic.auth.user.info",
-                                    connection.getSchemaRegistry().getBasicAuthUsername() + ":" +
-                                            connection.getSchemaRegistry().getBasicAuthPassword()
-                            )
+                        new UserInfoCredentialProvider().alias(),
+                        ImmutableMap.of(
+                                "schema.registry.basic.auth.user.info",
+                                connection.getSchemaRegistry().getBasicAuthUsername() + ":" +
+                                        connection.getSchemaRegistry().getBasicAuthPassword()
+                        )
                     );
                 restService.setBasicAuthCredentialProvider(basicAuthCredentialProvider);
             }
