@@ -1,6 +1,10 @@
 micronaut:
   application:
-    name: akhq-fork
+    name: akhq-bamboo
+  io:
+    watch:
+      paths: src/main
+      restart: false # enabled dev server with env vars MICRONAUT_IO_WATCH_RESTART=true
   router:
     static-resources:
       static:
@@ -9,10 +13,6 @@ micronaut:
       swagger:
         paths: classpath:META-INF/swagger
         mapping: "${akhq.server.base-path:}/swagger/**"
-  io:
-    watch:
-      paths: src/main
-      restart: false # enabled dev server with env vars MICRONAUT_IO_WATCH_RESTART=true
   security:
     enabled: true
     endpoints:
@@ -40,78 +40,96 @@ micronaut:
       record-stats: true
       expire-after-write: 0s
 
+endpoints:
+  all:
+    path: "${akhq.server.base-path:}"
+  health:
+    enabled: true
+    sensitive: false
+    details-visible: anonymous
+  info:
+    enabled: true
+    sensitive: false
+  metrics:
+    enabled: true
+    sensitive: false
+    export:
+      prometheus:
+        enabled: true
+        step: PT1M
+        descriptions: true
+  prometheus:
+    enabled: true
+    sensitive: false
+  caches:
+    enabled: true
+    sensitive: false
+
 akhq:
   server:
-    base-path: "" # if behind a reverse proxy, path to akhq without trailing slash (optional). Example: akhq is
-    # behind a reverse proxy with url http://my-server/akhq, set base-path: "/akhq".
-    # Not needed if you're behind a reverse proxy with subdomain http://akhq.my-server/
-    access-log: # Access log configuration (optional)
-      enabled: true # true by default
-      name: org.akhq.log.access # Logger name
-      format: "[Date: {}] [Duration: {} ms] [Url: {} {} {}] [Status: {}] [Ip: {}] [Length: {}] [Port: {}]" # Logger format
+    base-path: ""
+    access-log:
+      enabled: true
+      name: org.akhq.log.access
+      format: "[Date: {}] [Duration: {} ms] [Url: {} {} {}] [Status: {}] [Ip: {}] [Length: {}] [Port: {}]"
 
-  # default kafka properties for each clients, available for admin / producer / consumer (optional)
   clients-defaults:
     consumer:
       properties:
+        max.poll.records: 50
         isolation.level: read_committed
+        group.id: Akhq
+        enable.auto.commit: "false"
+        default.api.timeout.ms: 15000
 
-  # list of kafka cluster available for akhq
   connections:
-    urm-kafka-cluster:  # url friendly name for the cluster (letter, number, _, -, ... dot are not allowed here)
-      properties: # standard kafka properties (optional)
+    urm-kafka-cluster:
+      properties:
         security.protocol: SASL_SSL
         sasl.mechanism: PLAIN
-        ssl.endpoint.identification.algorithm : ""
-        # remove below 4 properties when you deploy to cloud.
-        sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="sbss_zfpl1vsjgvdh8ruw79e6op9so6gancirrbp8gj03aa_rfmtb78r95_rxtnnrzo8v3kw=" password="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkYTllYmVkYi03ODY4LTQxZTgtODdlNC0zMzFiMzAxMDk4M2MiLCJpYXQiOjE1OTI5MTkxNDEsImV4cCI6MTU5MzUyMzk0MSwiYXVkIjoiMGZmMTg5MzctNTQ4Ni00ZTE0LTllYzctNzkyYjYxYzEzNjkyIiwic3ViIjoic2Jzc196ZnBsMXZzamd2ZGg4cnV3NzllNm9wOXNvNmdhbmNpcnJicDhnajAzYWFfcmZtdGI3OHI5NV9yeHRubnJ6bzh2M2t3PSIsImlzcyI6ImthZmthLXNlcnZpY2Utb2F1dGgiLCJzY29wZSI6WyJrYWZrYS5ub25lIl19.KikP1ZjaE6HdmDExZO-1bH0WtA-xA7HDMnb6y3bep--Irj1IxMNtwJ_BY7DeAHIzkHzEV-8_MIpN0QF5AW5eYCvARMAuV2DiEZ-LaN8PMhhETaj_vtraFVxUFPdNshhawAPB5pHWrRZHso1qK4uyDac4e8Ga3x0PNDnYmccZ5I16MI3D2vPUWpBVaET8ISyfbaVRTTVTka0pMWd9qg115w4kk-D4MY_gKX88-0aOpaiznOeZt-wiC80n7WTPCC3VEOv9QEXTtO9GuVC4QtmSc61iRnNc3-i_482RQ7WSdnRSdoqPQMS4syHTUEjGrJgwgVORKee2RsL4JEObEOC14g";
-        ssl.truststore.location: C:\your absolute path\test.jks #absolute path
+        ssl.endpoint.identification.algorithm: ""
+        #remove below 4 properties when you deploy to cloud
+        sasl.jaas.config: org.apache.kafka.common.security.scram.ScramLoginModule required username="username" password="token";
+        ssl.truststore.location: \Abosolute path to your\truststore.jks #e.g C:\Users\Documents\test\truststore.jks
         ssl.truststore.password: test@123
-        bootstrap.servers: "localhost:19093" # your local server
-
-
+        bootstrap.servers: "localhost:19093"
 
   pagination:
-    page-size: 25 # number of elements per page (default : 25)
-    threads: 16 # Number of parallel threads to resolve page
+    page-size: 25
+    threads: 16
 
-  # Topic list display options (optional)
   topic:
-    retention: 172800000 # default retention period when creating topic
-    partition: 3 #  default number of partition when creating topic
-    replication: 3 # default number of replicas when creating topic
-    default-view: HIDE_INTERNAL # default list view (ALL, HIDE_INTERNAL, HIDE_INTERNAL_STREAM, HIDE_STREAM)
-    internal-regexps: # list of regexp to be considered as internal (internal topic can't be deleted or updated)
+    default-view: HIDE_INTERNAL
+    replication: 1
+    retention: 86400000
+    partition: 1
+    internal-regexps:
       - "^_.*$"
       - "^.*_schemas$"
       - "^.*connect-config$"
       - "^.*connect-offsets$1"
       - "^.*connect-status$"
-    stream-regexps: # list of regexp to be considered as internal stream topic
+    stream-regexps:
       - "^.*-changelog$"
       - "^.*-repartition$"
       - "^.*-rekey$"
-    skip-consumer-groups: false # Skip loading consumer group information when showing topics
+    skip-consumer-groups: false
 
-  # Topic display data options (optional)
   topic-data:
-    sort: OLDEST # default sort order (OLDEST, NEWEST) (default: OLDEST)
-    size: 50 # max record per page (default: 50)
-    poll-timeout: 1000 # The time, in milliseconds, spent waiting in poll if data is not available in the buffer.
+    sort: OLDEST
+    size: 50
+    poll-timeout: 1000
 
-  # Auth & Roles (optional)
   security:
-    # Basic auth configuration
+    default-group: no-roles
     basic-auth:
-      user: # Username
-        password: add1743eae5bbd8ea17b3d3b3531d0f3de072d10599edc0d8e107af90e52245a # Password in sha256
-        groups: # Groups for the user
+      user:
+        password: add1743eae5bbd8ea17b3d3b3531d0f3de072d10599edc0d8e107af90e52245a
+        groups:
           - admin
-    default-group: no-roles # Default groups for all the user even unlogged user
-    # Groups definition
     groups:
-      admin: # Group name
-        roles:  # roles for the group
+      admin:
+        roles:
           - topic/read
           - topic/insert
           - topic/delete
@@ -135,11 +153,14 @@ akhq:
           - connect/update
           - connect/delete
           - connect/state/update
-        attributes:
-          # Regexp to filter topic available for group
-          topics-filter-regexp:
-      topic-reader: # Other group
+      reader:
         roles:
           - topic/read
-        attributes:
-          topics-filter-regexp: "test\\.reader.*"
+          - node/read
+          - topic/data/read
+          - group/read
+          - registry/read
+          - acls/read
+          - connect/read
+      no-roles:
+        roles: []

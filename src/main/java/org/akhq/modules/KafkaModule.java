@@ -7,6 +7,7 @@ import io.confluent.kafka.schemaregistry.client.rest.RestService;
 import io.confluent.kafka.schemaregistry.client.security.basicauth.BasicAuthCredentialProvider;
 import io.confluent.kafka.schemaregistry.client.security.basicauth.BasicAuthCredentialProviderFactory;
 import io.confluent.kafka.schemaregistry.client.security.basicauth.UserInfoCredentialProvider;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.admin.AdminClient;
@@ -16,11 +17,11 @@ import org.apache.kafka.common.config.SaslConfigs;
 import org.apache.kafka.common.config.SslConfigs;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.codehaus.httpcache4j.uri.URIBuilder;
 import org.akhq.configs.AbstractProperties;
 import org.akhq.configs.Connection;
 import org.akhq.configs.Default;
-
 import org.sourcelab.kafka.connect.apiclient.Configuration;
 import org.sourcelab.kafka.connect.apiclient.KafkaConnectClient;
 
@@ -66,7 +67,6 @@ public class KafkaModule {
     }
 
     private Connection getConnection(String cluster) {
-
         return this.connections
                 .stream()
                 .filter(r -> r.getName().equals(cluster))
@@ -76,6 +76,7 @@ public class KafkaModule {
 
     private Properties getDefaultsProperties(List<? extends AbstractProperties> current, String type) {
         Properties properties = new Properties();
+
         current
                 .stream()
                 .filter(r -> r.getName().equals(type))
@@ -91,6 +92,7 @@ public class KafkaModule {
         props.putAll(this.getKafKaProperties());
         props.putAll(this.getDefaultsProperties(this.defaults, "consumer"));
         props.putAll(this.getDefaultsProperties(this.connections, clusterId));
+
         return props;
     }
 
@@ -99,6 +101,7 @@ public class KafkaModule {
         props.putAll(this.getKafKaProperties());
         props.putAll(this.getDefaultsProperties(this.defaults, "producer"));
         props.putAll(this.getDefaultsProperties(this.connections, clusterId));
+
         return props;
     }
 
@@ -107,51 +110,8 @@ public class KafkaModule {
         props.putAll(this.getKafKaProperties());
         props.putAll(this.getDefaultsProperties(this.defaults, "admin"));
         props.putAll(this.getDefaultsProperties(this.connections, clusterId));
+
         return props;
-    }
-
-
-    private Map<String, AdminClient> adminClient = new HashMap<>();
-
-    public AdminClient getAdminClient(String clusterId) {
-        if (!this.adminClient.containsKey(clusterId)) {
-            this.adminClient.put(clusterId, AdminClient.create(this.getAdminProperties(clusterId)));
-        }
-
-        return this.adminClient.get(clusterId);
-    }
-
-    public KafkaConsumer<byte[], byte[]> getConsumer(String clusterId) {
-        return new KafkaConsumer<>(
-                this.getConsumerProperties(clusterId),
-                new ByteArrayDeserializer(),
-                new ByteArrayDeserializer()
-        );
-    }
-
-    public KafkaConsumer<byte[], byte[]> getConsumer(String clusterId, Properties properties) {
-        Properties props = this.getConsumerProperties(clusterId);
-        props.putAll(properties);
-
-        return new KafkaConsumer<>(
-                props,
-                new ByteArrayDeserializer(),
-                new ByteArrayDeserializer()
-        );
-    }
-
-    private Map<String, KafkaProducer<byte[], byte[]>> producers = new HashMap<>();
-
-    public KafkaProducer<byte[], byte[]> getProducer(String clusterId) {
-        if (!this.producers.containsKey(clusterId)) {
-            this.producers.put(clusterId, new KafkaProducer<>(
-                    this.getProducerProperties(clusterId),
-                    new ByteArraySerializer(),
-                    new ByteArraySerializer()
-            ));
-        }
-
-        return this.producers.get(clusterId);
     }
 
     private Properties getKafKaProperties() {
@@ -196,6 +156,50 @@ public class KafkaModule {
         }
         return caCert;
     }
+
+    private Map<String, AdminClient> adminClient = new HashMap<>();
+
+    public AdminClient getAdminClient(String clusterId) {
+        if (!this.adminClient.containsKey(clusterId)) {
+            this.adminClient.put(clusterId, AdminClient.create(this.getAdminProperties(clusterId)));
+        }
+
+        return this.adminClient.get(clusterId);
+    }
+
+    public KafkaConsumer<byte[], byte[]> getConsumer(String clusterId) {
+        return new KafkaConsumer<>(
+                this.getConsumerProperties(clusterId),
+                new ByteArrayDeserializer(),
+                new ByteArrayDeserializer()
+        );
+    }
+
+    public KafkaConsumer<byte[], byte[]> getConsumer(String clusterId, Properties properties) {
+        Properties props = this.getConsumerProperties(clusterId);
+        props.putAll(properties);
+
+        return new KafkaConsumer<>(
+                props,
+                new ByteArrayDeserializer(),
+                new ByteArrayDeserializer()
+        );
+    }
+
+    private Map<String, KafkaProducer<byte[], byte[]>> producers = new HashMap<>();
+
+    public KafkaProducer<byte[], byte[]> getProducer(String clusterId) {
+        if (!this.producers.containsKey(clusterId)) {
+            this.producers.put(clusterId, new KafkaProducer<>(
+                    this.getProducerProperties(clusterId),
+                    new ByteArraySerializer(),
+                    new ByteArraySerializer()
+            ));
+        }
+
+        return this.producers.get(clusterId);
+    }
+
 
     public RestService getRegistryRestClient(String clusterId) {
         Connection connection = this.getConnection(clusterId);
