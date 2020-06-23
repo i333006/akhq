@@ -23,15 +23,7 @@ public class CFEnvUtils {
                 : getKafkaService().getJsonObject("credentials").getJsonObject("cluster").getString(type);
     }
 
-    public static String getBootstrapServers_Default(String def) {
-        return getBootstrapServers(def, "brokers");
-    }
-
-    public static String getBootstrapServers_Plain(String def) {
-        return getBootstrapServers(def, "brokers.plain");
-    }
-
-    public static String getBootstrapServers_AuthSSL(String def) {
+    public static String getBootstrapServersAuthSSL(String def) {
         return getBootstrapServers(def, "brokers.auth_ssl");
     }
 

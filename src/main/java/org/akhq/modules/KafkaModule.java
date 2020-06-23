@@ -57,6 +57,7 @@ public class KafkaModule {
     private String caCert = CFEnvUtils.getRootCertUrl("");
 
     private String bootstrapServers = CFEnvUtils.getBootstrapServers_AuthSSL("");
+    private String bootstrapServers = CFEnvUtils.getBootstrapServersAuthSSL("");
 
     private String trustStorePass = String.valueOf(UUID.randomUUID());
 
