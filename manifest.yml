@@ -8,7 +8,7 @@ applications:
     buildpack: https://github.com/cloudfoundry/java-buildpack.git#v4.16
     timeout: 180
     services:
-      - mykafka
+      - kafka-service
       - application-log
     env:
       JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+}}'
