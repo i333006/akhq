@@ -1,23 +1,21 @@
 package org.akhq.configs;
 
 import com.google.common.hash.Hashing;
-import io.micronaut.context.annotation.EachProperty;
-import io.micronaut.context.annotation.Parameter;
 import lombok.Getter;
+import org.akhq.modules.CFEnvUtils;
 
+import javax.inject.Singleton;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-@EachProperty("akhq.security.basic-auth")
 @Getter
+@Singleton
 public class BasicAuth {
-    String username;
-    String password;
-    List<String> groups;
-
-    public BasicAuth(@Parameter String username) {
-        this.username = username;
-    }
+    String username = CFEnvUtils.getUsername("");
+    String password = Hashing.sha256()
+                        .hashString(CFEnvUtils.getPassword(""), StandardCharsets.UTF_8)
+                        .toString();
+    List<String> groups = List.of("admin");
 
     @SuppressWarnings("UnstableApiUsage")
     public boolean isValidPassword(String password) {

@@ -122,11 +122,6 @@ akhq:
 
   security:
     default-group: no-roles
-    basic-auth:
-      user:
-        password: add1743eae5bbd8ea17b3d3b3531d0f3de072d10599edc0d8e107af90e52245a
-        groups:
-          - admin
     groups:
       admin:
         roles:
