@@ -88,11 +88,7 @@ akhq:
         security.protocol: SASL_SSL
         sasl.mechanism: PLAIN
         ssl.endpoint.identification.algorithm: ""
-        #remove below 4 properties when you deploy to cloud
-        sasl.jaas.config: org.apache.kafka.common.security.plain.PlainLoginModule required username="username" password="token";
-        ssl.truststore.location: \Abosolute path to your\truststore.jks #e.g C:\Users\Documents\test\truststore.jks
-        ssl.truststore.password: test@123
-        bootstrap.servers: "localhost:19093"
+
 
   pagination:
     page-size: 25
